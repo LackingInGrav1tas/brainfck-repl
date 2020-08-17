@@ -13,7 +13,7 @@ fn main() {
     // creating simulation of memory
     let mut memory: [i32; 30000] = [0; 30000];
     let mut ip: usize = 0;
-
+    let mut highest: usize = 1;
     // the L in REPL
     loop {
         // getting line; the R
@@ -36,6 +36,9 @@ fn main() {
                 '-' => memory[ip] -= 1,
                 '>' => {
                     ip += 1;
+                    if ip+1 > highest {
+                        highest = ip+1;
+                    }
                     if ip > 30000 {
                         error("Stack overflow - out of memory cells."); // out of memory
                     }
@@ -96,18 +99,25 @@ fn main() {
                 // <helper>
                 'p' => memory[ip] += 48, // initializes the object for ascii printing if it's a num
                 'e' => error("Exiting"),
-                'c' => { // clears the environment
+                'r' => { // resets the environment
                     memory = [0; 30000];
                     ip = 0;
+                    highest = 1;
                     break;
                 },
                 'h' => { // prints out info
                     println!("Brainfuck REPL is a REPL (read-eval-print-loop) for the programming language Brainfuck.\nBrainfuck is a esoteric programming language comprised of 8 operations:\n'>': shift forward on the memory tape\n'<': shift backwards\n'+': increment the value at the pointer\n'-': decrement the value\n',': get user input and store as an int\n'.': print the ascii value of the number beneath the pointer\n'[': if the value under the pointer is 0, it skips to ]\n']': jumps back it the value is non-zero");
-                    print!("Helper characters...\n'h': help\n'c': reset environment\n'e': exit\n'p': adds 48 to the value\n'v': prints the int value of the cell\n'i': prints the location on the memory strip\nHello World: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.");
+                    print!("Helper characters...\n'h': help\n'r': reset environment\n'e': exit\n'p': adds 48 to the value\n'v': prints the int value of the cell\n'i': prints the location on the memory strip\n'n': visualizes the nodes\nHello World: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.");
                     break;
                 },
                 'v' => print!("{}", memory[ip]),
                 'i' => print!("{}", ip),
+                'n' => {
+                    for i in 0..highest{
+                        print!("[{}] ", memory[i]);
+                    }
+                    println!();
+                },
                 // </helper>
                 _ => (),
             }

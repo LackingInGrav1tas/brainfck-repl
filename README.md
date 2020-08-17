@@ -9,11 +9,12 @@ Example programs (not by me) can be found at http://www.hevanet.com/cristofd/bra
 ### Added helper commands:
 ```
 'h': help
-'c': reset environment
+'r': reset environment
 'e': exit
 'p': adds 48 to the value
 'v': prints the int value of the cell
 'i': prints the location on the memory strip
+'n': visualizes the nodes
 ```
 
 ### Sample usage
