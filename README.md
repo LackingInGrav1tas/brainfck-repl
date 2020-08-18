@@ -23,13 +23,12 @@ Brainfuck REPL
 A Rust implementation of the Brainfuck language, with some helper commands.
 Type 'h' for more info.
 
-bf: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.
+brainfck> ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.
 Hello World!
 
-bf: n
-[0] [0] [72] [100] [87] [33] [10]
-
-bf: 
+brainfck> n 
+[0] [0] [72] [100] [87] [33] [10] 
+brainfck> 
 ```
 
 ### Brainfuck EBNF

@@ -14,15 +14,19 @@ fn error(message: &str, vm: &mut Machine) {
 
 fn main() {
     // prints out some info
-    println!("Brainfuck REPL\nA Rust implementation of the Brainfuck language, with some helper commands.\nType 'h' for more info.");
+    println!("Brainfuck REPL\nA Rust implementation of the Brainfuck language, with some helper commands.\nType 'h' for more info.\n");
 
     // initializing vm
     let mut vm: Machine = Machine {memory: [0; 30000], ip: 0, highest: 1};
-
     // the L in REPL
+    let mut printed: bool = false;
     loop {
         // getting line; the R
-        print!("\nbf: ");
+        if printed {
+            println!();
+            printed = false;
+        }
+        print!("brainfck> ");
         io::stdout().flush().unwrap();
         let mut line = String::new();
         io::stdin().read_line(&mut line).expect("Could not read input.");
@@ -57,7 +61,10 @@ fn main() {
                         vm.ip -= 1;
                     }
                 },
-                '.' => print!("{}", vm.memory[vm.ip] as u8 as char), // converts to ascii, then prints
+                '.' => {
+                    print!("{}", vm.memory[vm.ip] as u8 as char); // converts to ascii, then prints
+                    printed = true;
+                },
                 ',' => {
                     // messy getch
                     let mut input = String::new();
@@ -114,16 +121,22 @@ fn main() {
                 },
                 'h' => { // prints out info
                     println!("Brainfuck REPL is a REPL (read-eval-print-loop) for the programming language Brainfuck.\nBrainfuck is a esoteric programming language comprised of 8 operations:\n'>': shift forward on the memory tape\n'<': shift backwards\n'+': increment the value at the pointer\n'-': decrement the value\n',': get user input and store as an int\n'.': print the ascii value of the number beneath the pointer\n'[': if the value under the pointer is 0, it skips to ]\n']': jumps back it the value is non-zero");
-                    print!("Helper characters...\n'h': help\n'r': reset environment\n'e': exit\n'p': adds 48 to the value\n'v': prints the int value of the cell\n'i': prints the location on the memory strip\n'n': visualizes the nodes\nHello World: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.");
+                    println!("Helper characters...\n'h': help\n'r': reset environment\n'e': exit\n'p': adds 48 to the value\n'v': prints the int value of the cell\n'i': prints the location on the memory strip\n'n': visualizes the nodes\nHello World: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.");
                     break;
                 },
-                'v' => print!("{}", vm.memory[vm.ip]),
-                'i' => print!("{}", vm.ip),
+                'v' => {
+                    print!("{}", vm.memory[vm.ip]);
+                    printed = true;
+                },
+                'i' => {
+                    print!("{}", vm.ip);
+                    printed = true;
+                },
                 'n' => {
                     for index in 0..vm.highest{
                         print!("[{}] ", vm.memory[index]);
                     }
-                    println!();
+                    printed = true;
                 },
                 // </helper>
                 _ => (),
