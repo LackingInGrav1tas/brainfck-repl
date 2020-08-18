@@ -1,19 +1,24 @@
 use std::io;
 use std::io::Write;
 
-fn error(message: &str) {
-    println!("\n{}", message);
-    panic!("Exiting...");
+struct Machine {
+    memory: [i32; 30000],
+    ip: usize,
+    highest: usize,
+}
+
+fn error(message: &str, vm: &mut Machine) {
+    println!("\n{}, resetting environment.", message);
+    *vm = Machine { memory:[0; 30000], ip: 0, highest: 1 };
 }
 
 fn main() {
     // prints out some info
     println!("Brainfuck REPL\nA Rust implementation of the Brainfuck language, with some helper commands.\nType 'h' for more info.");
 
-    // creating simulation of memory
-    let mut memory: [i32; 30000] = [0; 30000];
-    let mut ip: usize = 0;
-    let mut highest: usize = 1;
+    // initializing vm
+    let mut vm: Machine = Machine {memory: [0; 30000], ip: 0, highest: 1};
+
     // the L in REPL
     loop {
         // getting line; the R
@@ -22,47 +27,51 @@ fn main() {
         let mut line = String::new();
         io::stdin().read_line(&mut line).expect("Could not read input.");
         let char_vec: Vec<char> = line.chars().collect();
-
         let mut i: usize = 0; // for loops won't work, unless i'm missing something
         
         loop { // the E
 
-            if i == line.len() { // breaking at the end of the line
+            if i >= line.len() { // breaking at the end of the line
                 break;
             }
-
+            if vm.ip == 30000 {
+                error("Memory overflow (no cells left)", &mut vm);
+                break;
+            }
             match char_vec[i] {
-                '+' => memory[ip] += 1,
-                '-' => memory[ip] -= 1,
+                '+' => vm.memory[vm.ip] += 1,
+                '-' => vm.memory[vm.ip] -= 1,
                 '>' => {
-                    ip += 1;
-                    if ip+1 > highest {
-                        highest = ip+1;
+                    vm.ip += 1;
+                    if vm.ip+1 > vm.highest {
+                        vm.highest = vm.ip+1;
                     }
-                    if ip > 30000 {
-                        error("Stack overflow - out of memory cells."); // out of memory
+                    if vm.ip > 30000 {
+                        error("Memory overflow - out of memory cells", &mut vm); // out of memory
                     }
                 },
                 '<' => {
-                    if ip == 0 { // not necessary because of usize, but cleaner.
-                        error("Stack underflow.");
+                    if vm.ip == 0 { // not necessary because of usize, but cleaner.
+                        error("Memory underflow", &mut vm);
+                    } else {
+                        vm.ip -= 1;
                     }
-                    ip -= 1;
                 },
-                '.' => print!("{}", memory[ip] as u8 as char), // converts to ascii, then prints
+                '.' => print!("{}", vm.memory[vm.ip] as u8 as char), // converts to ascii, then prints
                 ',' => {
                     // messy getch
                     let mut input = String::new();
                     std::io::stdin().read_line(&mut input).expect("Could not read input.");
-                    memory[ip] = input.chars().next().unwrap() as i32;
+                    vm.memory[vm.ip] = input.chars().next().unwrap() as i32;
                 },
                 '[' => {
-                    if memory[ip] == 0 { // skipping past the block
+                    if vm.memory[vm.ip] == 0 { // skipping past the block
                         let mut nests = 0;
                         loop { // finds the matching ]
                             i += 1;
                             if i == char_vec.len() {
-                                error("Unclosed '['");
+                                error("Unclosed '['", &mut vm);
+                                break;
                             }
                             match char_vec[i] {
                                 '[' => nests += 1,
@@ -79,7 +88,7 @@ fn main() {
                 },
 
                 ']' => {
-                    if memory[ip] != 0 { // jumping back
+                    if vm.memory[vm.ip] != 0 { // jumping back
                         let mut nests = 0;
                         loop { // finds the matching [
                             i -= 1; // doesn't need to check for underflow because usize cannot be negative
@@ -97,12 +106,10 @@ fn main() {
                     }
                 },
                 // <helper>
-                'p' => memory[ip] += 48, // initializes the object for ascii printing if it's a num
-                'e' => error("Exiting"),
+                'p' => vm.memory[vm.ip] += 48, // initializes the object for ascii printing if it's a num
+                'e' => {print!("Exiting...");return;},
                 'r' => { // resets the environment
-                    memory = [0; 30000];
-                    ip = 0;
-                    highest = 1;
+                    vm = Machine { memory:[0; 30000], ip: 0, highest: 1 };
                     break;
                 },
                 'h' => { // prints out info
@@ -110,11 +117,11 @@ fn main() {
                     print!("Helper characters...\n'h': help\n'r': reset environment\n'e': exit\n'p': adds 48 to the value\n'v': prints the int value of the cell\n'i': prints the location on the memory strip\n'n': visualizes the nodes\nHello World: ++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.");
                     break;
                 },
-                'v' => print!("{}", memory[ip]),
-                'i' => print!("{}", ip),
+                'v' => print!("{}", vm.memory[vm.ip]),
+                'i' => print!("{}", vm.ip),
                 'n' => {
-                    for i in 0..highest{
-                        print!("[{}] ", memory[i]);
+                    for index in 0..vm.highest{
+                        print!("[{}] ", vm.memory[index]);
                     }
                     println!();
                 },
