@@ -8,12 +8,20 @@ struct Machine {
 }
 
 impl Machine {
-    fn error(&mut self, message: &str) {
-        println!("\n{}, resetting environment.", message);
+    fn reset(&mut self) {
         self.memory = [0; 30000];
         self.ip = 0;
         self.highest = 1;
-    }   
+    }
+    fn error(&mut self, message: &str) {
+        println!("\n{}, resetting environment.", message);
+        self.reset();
+    }
+    fn nodes(&self) {
+        for index in 0..self.highest {
+            print!("[{}] ", self.memory[index]);
+        }
+    }
 }
 
 fn main() {
@@ -21,9 +29,9 @@ fn main() {
     println!("Brainfuck REPL\nA Rust implementation of the Brainfuck language, with some helper commands.\nType 'h' for more info.\n");
 
     // initializing vm
+    let mut printed: bool = false;
     let mut vm: Machine = Machine {memory: [0; 30000], ip: 0, highest: 1};
     // the L in REPL
-    let mut printed: bool = false;
     loop {
         // getting line; the R
         if printed {
@@ -120,7 +128,7 @@ fn main() {
                 'p' => vm.memory[vm.ip] += 48, // initializes the object for ascii printing if it's a num
                 'e' => {print!("Exiting...");return;},
                 'r' => { // resets the environment
-                    vm = Machine { memory:[0; 30000], ip: 0, highest: 1 };
+                    vm.reset();
                     break;
                 },
                 'h' => { // prints out info
@@ -137,9 +145,7 @@ fn main() {
                     printed = true;
                 },
                 'n' => {
-                    for index in 0..vm.highest{
-                        print!("[{}] ", vm.memory[index]);
-                    }
+                    vm.nodes();
                     printed = true;
                 },
                 // </helper>
