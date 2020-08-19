@@ -7,9 +7,13 @@ struct Machine {
     highest: usize,
 }
 
-fn error(message: &str, vm: &mut Machine) {
-    println!("\n{}, resetting environment.", message);
-    *vm = Machine { memory:[0; 30000], ip: 0, highest: 1 };
+impl Machine {
+    fn error(&mut self, message: &str) {
+        println!("\n{}, resetting environment.", message);
+        self.memory = [0; 30000];
+        self.ip = 0;
+        self.highest = 1;
+    }   
 }
 
 fn main() {
@@ -39,7 +43,7 @@ fn main() {
                 break;
             }
             if vm.ip == 30000 {
-                error("Memory overflow (no cells left)", &mut vm);
+                vm.error("Memory overflow (no cells left)");
                 break;
             }
             match char_vec[i] {
@@ -51,12 +55,12 @@ fn main() {
                         vm.highest = vm.ip+1;
                     }
                     if vm.ip > 30000 {
-                        error("Memory overflow - out of memory cells", &mut vm); // out of memory
+                        vm.error("Memory overflow - out of memory cells"); // out of memory
                     }
                 },
                 '<' => {
                     if vm.ip == 0 { // not necessary because of usize, but cleaner.
-                        error("Memory underflow", &mut vm);
+                        vm.error("Memory underflow");
                     } else {
                         vm.ip -= 1;
                     }
@@ -77,7 +81,7 @@ fn main() {
                         loop { // finds the matching ]
                             i += 1;
                             if i == char_vec.len() {
-                                error("Unclosed '['", &mut vm);
+                                vm.error("Unclosed '['");
                                 break;
                             }
                             match char_vec[i] {
