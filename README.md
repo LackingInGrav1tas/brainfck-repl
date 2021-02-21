@@ -30,8 +30,3 @@ brainfck> n
 [0] [0] [72] [100] [87] [33] [10] 
 brainfck> 
 ```
-
-### Brainfuck EBNF
-```EBNF
-<program> ::= ( '>' | '<' | '+' | '-' | ',' | '.' | '[' | ']' )* ; (*as you can see, quite complex*)
-```
